@@ -11,7 +11,8 @@ RUN apt-get update -y && \
 WORKDIR /home/minecraft
 
 # Copy additional files
-COPY config/eula.txt /data/eula.txt
+COPY config/eula.txt /home/minecraft/eula.txt
+COPY config/statup.sh /home/minecraft/startup.sh
 
 # the minecraft version to fetch
 ARG mc_version
@@ -21,7 +22,8 @@ ADD VERSION .
 RUN url=$(curl "https://mcversions.net/download/${mc_version}" 2> /dev/null | \
         grep -oP "https://[^\"]*server\\.jar") && \
     curl "${url}" --output "server.jar" && \
-    chmod +x "server.jar"
+    chmod +x "server.jar" && \
+    chmod +x "startup.sh"
 
 # set the exposed ports
 EXPOSE 25565
@@ -30,4 +32,4 @@ EXPOSE 25565
 WORKDIR /data
 
 # set run args
-CMD [ "java", "-Xms256M", "-Xmx1024M", "-jar", "/home/minecraft/server.jar" ]
+ENTRYPOINT [ "/home/minecraft/startup.sh" ]

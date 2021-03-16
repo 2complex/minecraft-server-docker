@@ -3,27 +3,47 @@ This repo contains the tools we use to dynamicly create and manage our minecraft
 
 ## Build
 
-To build your container just run
+First you need to make the script executable
 
 ```bash
 chmod +x mk-mc-base.sh
+```
+
+After that you can build the container
+
+```bash
+./mk-mc-base.sh $kind $version
+```
+
+The following kinds are supported:
+- `vanilla` - The official minecraft server
+
+Example
+
+```bash
 ./mk-mc-base.sh vanilla 1.16.4
 ```
 
 ## Run
 
-1. You need to create the `eula.txt` file in your data directory
-2. Run the container with
-    ```bash
-    sudo docker run -v "$(pwd)/data:/data" -p 25565:25565 -t "2complex/mc-:1.16.4"
-    ```
+Run the container with
+```bash
+sudo docker run -v "$(pwd)/data:/data" -p 25565:25565 -t "2complex/mc-$kind:$version"
+```
 
-You can mount the contents in the data directory separately by so:
-- `--mount type=bind,src=$data/banned-ips.json,dst=/data/banned-ips.json`
-- `--mount type=bind,src=$data/banned-players.json,dst=/data/banned-players.json`
-- `-v $data/logs:/data/logs`
-- `--mount type=bind,src=$data/ops.json,dst=/data/ops.json`
-- `--mount type=bind,src=$data/server.properties,dst=/data/server.properties`
-- `--mount type=bind,src=$data/usercache.json,dst=/data/usercache.json`
-- `--mount type=bind,src=$data/whitelist.json,dst=/data/whitelist.json`
-- `-v $data/world:/data/world`
+You can mount the contents in the data directory separately by doing so:
+- `-v $data:/data` - normal mount for the whole data directory
+- `-v $logs:/data/logs` - mount logs to your special log directory
+- `-v $world:/data/world` - mount the world data to your world directory
+
+You dont need to provide any `eula.txt`. This is done automaticly for you.
+
+If you need to increase the JVM maximum memory you can do this by one of the following:
+- add `2048M` (or whatever you need) to the end of the command. Example:
+    ```bash
+    sudo docker run -v "$(pwd)/data:/data" -p 25565:25565 -t "2complex/mc-$kind:$version" 2048M
+    ```
+- set the environment variable `MAX_RAM`. This can be done inline by adding `MAX_RAM=2048M` (or whatever value you need) to start of the command. Example:
+    ```bash
+    MAX_RAM=2048M sudo docker run -v "$(pwd)/data:/data" -p 25565:25565 -t "2complex/mc-$kind:$version"
+    ```
