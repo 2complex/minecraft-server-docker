@@ -12,7 +12,7 @@ WORKDIR /home/minecraft
 
 # Copy additional files
 COPY config/eula.txt /home/minecraft/eula.txt
-COPY config/statup.sh /home/minecraft/startup.sh
+COPY config/startup.sh /home/minecraft/startup.sh
 
 # the minecraft version to fetch
 ARG mc_version
