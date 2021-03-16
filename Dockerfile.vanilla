@@ -11,7 +11,7 @@ RUN apt-get update -y && \
 WORKDIR /home/minecraft
 
 # Copy additional files
-COPY config/eula.txt ./eula.txt
+COPY config/eula.txt /data/eula.txt
 
 # the minecraft version to fetch
 ARG mc_version

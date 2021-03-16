@@ -24,6 +24,7 @@ pushd build > /dev/null
 
 # prepare the docker file
 cp "../Dockerfile.${kind}" Dockerfile
+cp -r ../config ./config
 echo "${version}" > VERSION
 
 # build docker container
