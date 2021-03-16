@@ -1,0 +1,33 @@
+# This is a template file to build our minecraft server docker container
+
+FROM ubuntu:latest
+
+# update the system and install the required dependencies
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends wget curl ca-certificates openjdk-14-jre && \
+    rm -rf /var/lib/apt/lists/*
+
+# every minecraft server will run in this path
+WORKDIR /home/minecraft
+
+# Copy additional files
+COPY config/eula.txt ./eula.txt
+
+# the minecraft version to fetch
+ARG mc_version
+ADD VERSION .
+
+# fetch the selected version
+RUN url=$(curl "https://mcversions.net/download/${mc_version}" 2> /dev/null | \
+        grep -oP "https://[^\"]*server\\.jar") && \
+    curl "${url}" --output "server.jar" && \
+    chmod +x "server.jar"
+
+# set the exposed ports
+EXPOSE 25565
+
+# set the data directory for the server
+WORKDIR /data
+
+# set run args
+CMD [ "java", "-Xms256M", "-Xmx1024M", "-jar", "/home/minecraft/server.jar" ]
