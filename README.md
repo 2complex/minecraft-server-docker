@@ -24,6 +24,14 @@ Example
 ./mk-mc-base.sh vanilla 1.16.4
 ```
 
+### No Sudo
+
+If you don't want to build the docker in sudo mode just set the environment variable `NOSUDO` to `1`.
+
+```bash
+NOSUDO=1 ./mk-mc-base.sh $kind $version
+```
+
 ## Run
 
 Run the container with

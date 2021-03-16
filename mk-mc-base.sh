@@ -11,6 +11,9 @@
 
 kind=$1
 version=$2
+nosudo=${NOSUDO:=0}
+
+sudo=$([ "$nosudo" = "1" ] && echo "" || echo "sudo")
 
 # check input
 if [ ! -f "Dockerfile.${kind}" ]; then
@@ -28,7 +31,7 @@ cp -r ../config/* config/
 echo "${version}" > VERSION
 
 # build docker container
-sudo docker build \
+$sudo docker build \
     --build-arg "mc_version=${version}" \
     --build-arg "mc_kind=${kind}" \
     -t "2complex/mc-${kind}:${version}" .
