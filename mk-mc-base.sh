@@ -27,6 +27,7 @@ pushd build > /dev/null
 
 # prepare the docker file
 cp "../Dockerfile.${kind}" Dockerfile
+[[ ! -d config/ ]] && mkdir -p config/
 cp -r ../config/* config/
 echo "${version}" > VERSION
 
@@ -34,7 +35,8 @@ echo "${version}" > VERSION
 $sudo docker build \
     --build-arg "mc_version=${version}" \
     --build-arg "mc_kind=${kind}" \
-    -t "2complex/mc-${kind}:${version}" .
+    -t "2complex/mc-${kind}:${version}" . \
+    || exit $?
 
 # finish
 popd > /dev/null

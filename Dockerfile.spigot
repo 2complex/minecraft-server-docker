@@ -1,0 +1,35 @@
+# This is a template file to build our spigot minecraft server docker container
+
+FROM ubuntu:latest
+
+# update the system and install the required dependencies
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends wget curl ca-certificates openjdk-14-jre && \
+    rm -rf /var/lib/apt/lists/*
+
+# every minecraft server will run in this path
+WORKDIR /home/minecraft
+
+# Copy additional files
+COPY config/eula.txt /home/minecraft/eula.txt
+COPY config/startup.sh /home/minecraft/startup.sh
+COPY config/spigot.yml /home/minecraft/spigot.yml
+
+# the minecraft version to fetch
+ARG mc_version
+ADD VERSION .
+
+# fetch the selected version
+RUN curl "https://cdn.getbukkit.org/spigot/spigot-${mc_version}.jar" \
+        --output "server.jar" && \
+    chmod +x "server.jar" && \
+    chmod +x "startup.sh"
+
+# set the exposed ports
+EXPOSE 25565
+
+# set the data directory for the server
+WORKDIR /data
+
+# set run args
+ENTRYPOINT [ "/home/minecraft/startup.sh" ]
