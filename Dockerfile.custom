@@ -1,0 +1,34 @@
+# This is a template file to build our minecraft server docker container
+
+FROM ubuntu:latest
+
+ARG OPENJDK_PACKAGE_VERSION=openjdk-8-jre
+
+# update the system and install the required dependencies
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends wget curl ca-certificates \
+        ${OPENJDK_PACKAGE_VERSION:-openjdk-8-jre} && \
+    rm -rf /var/lib/apt/lists/*
+
+# every minecraft server will run in this path
+WORKDIR /home/minecraft
+
+# Copy additional files
+COPY config/eula.txt /home/minecraft/eula.txt
+COPY config/startup.sh /home/minecraft/startup.sh
+
+# the minecraft version to fetch
+ARG mc_version
+ADD VERSION .
+
+# fetch the selected version
+RUN chmod +x "startup.sh"
+
+# set the exposed ports
+EXPOSE 25565
+
+# set the data directory for the server
+WORKDIR /data
+
+# set run args
+ENTRYPOINT [ "/home/minecraft/startup.sh" ]

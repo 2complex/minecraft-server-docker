@@ -12,6 +12,7 @@ title="$(echo -e "Minecraft \u2661 Docker")"
 : ${mc_motd_ref="$config_dir/motd-ref"}
 : ${mc_docker_compose="$config_dir/docker-compose.yml"}
 : ${mc_data="$config_dir/data"}
+: ${mc_data_standalone="$config_dir/data-standalone"}
 : ${build_docker=1}
 
 directory="$(dirname "$0")"
@@ -23,6 +24,8 @@ echo "$directory" | grep -P "^\." > /dev/null && \
 
 [ ! -d "$mc_image_ref" ] && mkdir -p "$mc_image_ref"
 [ ! -d "$mc_motd_ref" ] && mkdir -p "$mc_motd_ref"
+[ ! -d "$mc_data" ] && mkdir -p "$mc_data"
+[ ! -d "$mc_data_standalone" ] && mkdir -p "$mc_data_standalone"
 
 show_msg () {
     dialog \
@@ -288,7 +291,7 @@ exec_add_mc () {
 
     show_info "Add Server" "Register server to local database"
 
-    echo "$mc_name" >> "$active_names"
+    # echo "$mc_name" >> "$active_names"
     echo "$mc_name" >> "$all_names"
     echo "$(date -Is) $(whoami) ${mc_name} ${mc_kind} ${mc_version}" >> "$mc_history"
     echo "2complex/mc-${mc_kind}:${mc_version}" > "${mc_image_ref}/${mc_name}"
@@ -299,6 +302,72 @@ exec_add_mc () {
     show_msg "$mc_name added" \
         "The $mc_kind ($mc_version) server is successfuly added." \
         || return 1
+}
+
+exec_add_standalone () {
+
+    insert_mc_name || return 1
+    insert_mc_motd || return 1
+    insert_mc_java_version || return 1
+
+    show_msg "Warning!" "$( \
+        echo "You are required to add a server.jar in the target directory!"; \
+        echo "There is no server.jar right now!" \
+    )"
+
+    mc_kind="custom"
+    mc_version="$mc_java_version"
+
+    [[ ! -f "$mc_images" ]] && touch "$mc_images"
+    if grep -x "${mc_kind} ${mc_version}" "${mc_images}"; then
+        :
+    else
+        if [[ "$build_docker" = "1" ]]; then
+            show_info "Add Server" "Create docker image..."
+
+            clear
+            pushd "$(dirname "$path_mk_docker")"
+            "./$(basename "$path_mk_docker")" "$mc_kind" "$mc_version" "$mc_java_version" \
+                || exit 1
+            popd
+
+            echo "${mc_kind} ${mc_version}" >> "${mc_images}"
+        fi
+    fi
+
+    show_info "Add Server" "Register server to local database"
+
+    echo "$mc_name" >> "$all_names"
+    echo "$(date -Is) $(whoami) ${mc_name} ${mc_kind} ${mc_version}" >> "$mc_history"
+    echo "2complex/mc-${mc_kind}:${mc_version}" > "${mc_image_ref}/${mc_name}"
+    echo "$mc_motd" > "${mc_motd_ref}/${mc_name}"
+
+    mkdir -p "$mc_data_standalone/$mc_name"
+    echo "#!/bin/bash" > "$mc_data_standalone/$mc_name/start.sh"
+    echo "sh -c \"screen -dmS ${name} java -Xmx4096M -jar server.jar\"" >> "$mc_data_standalone/$mc_name/start.sh"
+
+    compose="$mc_data_standalone/$mc_name/docker-compose.yml"
+    echo "# This file is automaticly generated. DO NOT CHANGE THIS MANUALLY!" > $compose
+    echo "# Use util.sh to update and edit this file." >> $compose
+    echo "version: \"3.9\"" >> $compose
+    echo "services:" >> $compose
+    echo "  mc-${mc_name}:" >> $compose
+    echo "    image: $(cat "${mc_image_ref}/${mc_name}")" >> $compose
+    echo "    container_name: mc-${mc_name}" >> $compose
+    echo "    restart: unless-stopped" >> $compose
+    echo "    volumes:" >> $compose
+    echo "      - ${mc_data_standalone}/${mc_name}:/data" >> $compose
+    echo "      - ${mc_data_standalone}/${mc_name}/server.jar:/home/minecraft/server.jar" >> $compose
+    echo "    environment:" >> $compose
+    echo "      - bungeecord=false" >> $compose
+    echo "      - motd=$(cat "${mc_motd_ref}/${mc_name}")" >> $compose
+    echo "    ports:" >> $compose
+    echo "      - 23000:25565" >> $compose
+
+    show_msg "$mc_name added" \
+        "The $mc_kind ($mc_version) server is successfuly added." \
+        || return 1
+
 }
 
 exec_change_active () {
@@ -393,6 +462,7 @@ while true; do
         "3" "Change active server" \
         "4" "Change Motd of one server" \
         "2" "Rebuild docker-compose.yml" \
+        "5" "Add custom server" \
         2>&1 1>&3 \
     )
     exit_status=$?
@@ -426,6 +496,9 @@ while true; do
             ;;
         4)
             exec_change_motd
+            ;;
+        5)
+            exec_add_standalone
             ;;
     esac
 done
