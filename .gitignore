@@ -1,1 +1,11 @@
 build/
+
+# remove local test data
+compose/data
+compose/image-ref
+compose/motd-ref
+compose/active-names
+compose/all-names
+compose/docker-compose.yml
+compose/history.log
+compose/images

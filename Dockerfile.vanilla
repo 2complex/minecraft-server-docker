@@ -2,9 +2,12 @@
 
 FROM ubuntu:latest
 
+ARG OPENJDK_PACKAGE_VERSION=openjdk-8-jre
+
 # update the system and install the required dependencies
 RUN apt-get update -y && \
-    apt-get install -y --no-install-recommends wget curl ca-certificates openjdk-14-jre && \
+    apt-get install -y --no-install-recommends wget curl ca-certificates \
+        ${OPENJDK_PACKAGE_VERSION:-openjdk-8-jre} && \
     rm -rf /var/lib/apt/lists/*
 
 # every minecraft server will run in this path

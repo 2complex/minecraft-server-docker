@@ -193,6 +193,34 @@ insert_mc_version () {
     done
 }
 
+insert_mc_java_version () {
+    exec 3>&1
+    mc_java_version=$(dialog \
+        --backtitle "$title" \
+        --title "Select Java Version" \
+        --clear \
+        --no-items \
+        --menu "Please select:" 0 0 10 \
+        openjdk-8-jre \
+        openjdk-16-jre \
+        2>&1 1>&3 \
+    )
+    exit_status=$?
+    exec 3>&-
+
+    case $exit_status in
+        1)
+            return 1
+            ;;
+        255)
+            clear
+            echo $mc_kind
+            echo "Program aborted." >&2
+            exit
+            ;;
+    esac
+}
+
 build_docker_compose () {
     show_info "Rebuild docker compose" \
         "Rebuilding docker compose file. Please wait a moment."
@@ -239,6 +267,7 @@ exec_add_mc () {
     insert_mc_name || return 1
     insert_mc_motd || return 1
     insert_mc_version || return 1
+    insert_mc_java_version || return 1
 
     [[ ! -f "$mc_images" ]] && touch "$mc_images"
     if grep -x "${mc_kind} ${mc_version}" "${mc_images}"; then
@@ -249,7 +278,7 @@ exec_add_mc () {
 
             clear
             pushd "$(dirname "$path_mk_docker")"
-            "./$(basename "$path_mk_docker")" "$mc_kind" "$mc_version" \
+            "./$(basename "$path_mk_docker")" "$mc_kind" "$mc_version" "$mc_java_version" \
                 || exit 1
             popd
 

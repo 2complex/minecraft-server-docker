@@ -11,6 +11,7 @@
 
 kind=$1
 version=$2
+java_version=${3:-openjdk-8-jre}
 nosudo=${NOSUDO:=0}
 
 sudo=$([ "$nosudo" = "1" ] && echo "" || echo "sudo")
@@ -35,6 +36,7 @@ echo "${version}" > VERSION
 $sudo docker build \
     --build-arg "mc_version=${version}" \
     --build-arg "mc_kind=${kind}" \
+    --build-arg "OPENJDK_PACKAGE_VERSION=${java_version}" \
     -t "2complex/mc-${kind}:${version}" . \
     || exit $?
 
