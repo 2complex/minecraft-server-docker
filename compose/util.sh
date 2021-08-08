@@ -1,6 +1,6 @@
 #!/bin/bash
 
-config_dir="$(pwd)"
+#config_dir="$(pwd)"
 
 title="$(echo -e "Minecraft \u2661 Docker")"
 : ${config_dir="$HOME/.mc"}
@@ -230,6 +230,8 @@ build_docker_compose () {
     echo "    restart: unless-stopped" >> $mc_docker_compose
     echo "    volumes:" >> $mc_docker_compose
     echo "      - ${mc_data}/bungee/:/server" >> $mc_docker_compose
+    echo "    ports:" >> $mc_docker_compose
+    echo "      - 25565:25565" >> $mc_docker_compose
 }
 
 exec_add_mc () {    
@@ -286,7 +288,7 @@ exec_change_active () {
         --clear \
         --visit-items \
         --separate-output \
-        --buildlist "Move active server with the spacebar to the right." 0 0 1 \
+        --buildlist "Move active server with the spacebar to the right." 0 0 10 \
         $options \
         2>&1 1>&3 \
         | sed 's/"//g' \
