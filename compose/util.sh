@@ -245,6 +245,8 @@ build_docker_compose () {
         echo "    image: $(cat "${mc_image_ref}/${name}")" >> $mc_docker_compose
         echo "    container_name: mc-${name}" >> $mc_docker_compose
         echo "    restart: unless-stopped" >> $mc_docker_compose
+        echo "    stdin_open: true" >> $mc_docker_compose
+        echo "    tty: true" >> $mc_docker_compose
         echo "    volumes:" >> $mc_docker_compose
         echo "      - ${mc_data}/${name}:/data" >> $mc_docker_compose
         echo "    environment:" >> $mc_docker_compose
