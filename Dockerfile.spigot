@@ -6,7 +6,7 @@ ARG OPENJDK_PACKAGE_VERSION=openjdk-8-jre
 
 # update the system and install the required dependencies
 RUN apt-get update -y && \
-    apt-get install -y --no-install-recommends wget curl ca-certificates \
+    apt-get install -y --no-install-recommends wget grep curl ca-certificates \
         ${OPENJDK_PACKAGE_VERSION:-openjdk-8-jre} && \
     rm -rf /var/lib/apt/lists/*
 
@@ -23,10 +23,16 @@ ARG mc_version
 ADD VERSION .
 
 # fetch the selected version
-RUN curl "https://cdn.getbukkit.org/spigot/spigot-${mc_version}.jar" \
-        --output "server.jar" || \
-    curl "https://download.getbukkit.org/spigot/spigot-${mc_version}.jar" \
-        --output "server.jar" && \
+RUN (if curl --head "https://cdn.getbukkit.org/spigot/spigot-${mc_version}.jar" 2> /dev/null |\
+        grep -P "text/html" > /dev/null; \
+    then \
+        curl "https://download.getbukkit.org/spigot/spigot-${mc_version}.jar" \
+            --output "server.jar"; \
+    else \
+        curl "https://cdn.getbukkit.org/spigot/spigot-${mc_version}.jar" \
+            --output "server.jar"; \
+    fi \
+    ) && \
     chmod +x "server.jar" && \
     chmod +x "startup.sh"
 
