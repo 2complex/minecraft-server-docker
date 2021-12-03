@@ -24,6 +24,8 @@ ADD VERSION .
 
 # fetch the selected version
 RUN curl "https://cdn.getbukkit.org/spigot/spigot-${mc_version}.jar" \
+        --output "server.jar" || \
+    curl "https://download.getbukkit.org/spigot/spigot-${mc_version}.jar" \
         --output "server.jar" && \
     chmod +x "server.jar" && \
     chmod +x "startup.sh"

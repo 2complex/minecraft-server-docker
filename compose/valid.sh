@@ -15,11 +15,20 @@ case $kind in
         ;;
     spigot)
         header=$(curl --head "https://cdn.getbukkit.org/spigot/spigot-${version}.jar" 2> /dev/null)
-        echo "$header" | grep -P "HTTP.* 200" > /dev/null \
-            && echo "$header" | grep -P "content-type: application/java-archive" > /dev/null \
-            && exit 0 \
-            || exit 1
-        ;;
+        if [[ "$?" == "0" ]]; then
+            echo "$header" | grep -P "HTTP.* 200" > /dev/null \
+                && echo "$header" | grep -P "content-type: application/java-archive" > /dev/null \
+                && exit 0 \
+                || exit 1
+            ;;
+        else
+            header=$(curl --head "https://download.getbukkit.org/spigot/spigot-${version}.jar" 2> /dev/null)
+            echo "$header" | grep -P "HTTP.* 200" > /dev/null \
+                && echo "$header" | grep -P "Content-Type: application/java-archive" > /dev/null \
+                && exit 0 \
+                || exit 1
+            ;;
+        fi
 esac
 
 exit 1
