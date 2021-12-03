@@ -206,6 +206,7 @@ insert_mc_java_version () {
         --menu "Please select:" 0 0 10 \
         openjdk-8-jre \
         openjdk-16-jre \
+        openjdk-17-jre \
         2>&1 1>&3 \
     )
     exit_status=$?
