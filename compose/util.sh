@@ -259,7 +259,7 @@ build_docker_compose () {
     mkdir -p "$mc_data/$bungee"
     # add bungeecord proxy
     echo "  bungeecord:" >> $mc_docker_compose
-    echo "    image: itzg/docker-bungeecord" >> $mc_docker_compose
+    echo "    image: itzg/bungeecord:latest" >> $mc_docker_compose
     echo "    container_name: bungeecord" >> $mc_docker_compose
     echo "    restart: unless-stopped" >> $mc_docker_compose
     echo "    volumes:" >> $mc_docker_compose
