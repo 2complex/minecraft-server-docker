@@ -25,4 +25,5 @@ if [[ ! -z "${motd}" ]] && [[ -f /data/server.properties ]]; then
 fi
 
 java -Xms256M "-Xmx${max_ram:=1024M}" \
+    -Dlog4j2.formatMsgNoLookups=true \
     -jar /home/minecraft/server.jar
